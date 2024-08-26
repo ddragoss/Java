@@ -2,75 +2,68 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.Inet4Address;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
 public class Fisier {
-  private String fisierIesire;
-  private String fisierIntrare;
+  private static String fisierIesire;
+  private static String fisierIntrare;
 
-    public String getFisierIesire() {
-        return fisierIesire;
-    }
+  private Persoana persoana;
+  private ActIdentitate buletin;
 
-    public String getFisierIntrare() {
-        return fisierIntrare;
-    }
 
-    public void setFisierIesire(String fisierIesire) {
-        this.fisierIesire = fisierIesire;
-    }
 
-    public void setFisierIntrare(String fisierIntrare) {
-        this.fisierIntrare = fisierIntrare;
-    }
 
-    public   void citescFisier(String fisierIntrare, Persoana persoana){
 
+    public static List<Persoana> citescFisier(String fisierIntrare){
+        List<Persoana> listaPersone = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(fisierIntrare))) {
             // pot trata direct in blocul try doar resursele care implementeaza inteftata close
             String linie = null;
+            ActIdentitate a1 ;
+            Persoana p1 ;
             while ((linie = br.readLine()) != null) {
                 //System.out.println(linie);
 
                 String[] date =  linie.split("\\|");
 
-                if(date.length==3){
+                if(date.length==5){
                     String nr_crt = date[0];
                     String nume =date[1];
+
                     String cnp = date[2];
-
-                    //System.out.println(nume);
-
-                   String numeNou = schimbaNume(nume);
-                   String cnpAnNou = schimbaCNP(cnp);
-                   System.out.println(cnp.length());
-                   //System.out.println("CNP vechi: "+ cnp +"CNP nou: "+cnpAnNou);
-
-                 //  System.out.println(numeNou);
-                //    System.out.println(cnp);
-//                    scriuInFisier(nr_crt,numeNou,cnp);
-
+                    String serie = date[3];
+                    String numar = date[4];
+                    a1 =  new ActIdentitate(cnp,serie,numar);
+                    p1 = new Persoana();
+                    p1.setBuletin(a1);
+                    p1.setNume(nume);
+                    p1.setId(Integer.parseInt(nr_crt));
+                    listaPersone.add(p1);
                 }else{
                     System.out.println("Format incorect linie!!"+linie);
                 }
-
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
+        return listaPersone;
     }
 
-    private void scriuInFisier(String nrCrt, String nume, String cnp){
-        try(PrintStream out = new PrintStream(fisierIntrare)){
-            out.println(nrCrt+"|"+nume+"|"+cnp);
+    public static void scriuInFisier(List<Persoana> listaPersoane, String fisierIesire){
+        try(PrintStream out = new PrintStream(fisierIesire)){
+          listaPersoane.forEach(p1 -> out.println(p1.getLinieFisier()));
 
         }catch (IOException e){
             System.out.println(e.getMessage());
         }
     }
 
-    private String schimbaNume(String nume){
+    public static String schimbaNume(String nume){
         String[] arrNume = nume.split(" ");
         StringBuilder numeSchimbat = new StringBuilder();
         for(String eachNume : arrNume){
